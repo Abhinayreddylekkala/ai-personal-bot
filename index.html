@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Personal Assistant</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f0f4f8;
+      font-family: Arial, sans-serif;
+    }
+    .chat-box {
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .user-msg {
+      text-align: right;
+      color: #0d6efd;
+    }
+    .bot-msg {
+      text-align: left;
+      color: #198754;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">AI Personal Assistant</h2>
+
+    <div class="chat-box shadow-sm p-3 mb-4 bg-body rounded" id="chat-box">
+      <!-- Messages will be added here -->
+    </div>
+
+    <form id="chat-form">
+      <div class="input-group mb-3">
+        <input type="text" id="command" class="form-control" placeholder="Type your command..." required>
+        <button type="button" class="btn btn-outline-secondary" onclick="startListening()">
+          🎤
+        </button>
+        <button type="submit" class="btn btn-primary">Send</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById("chat-box");
+    const chatForm = document.getElementById("chat-form");
+    const commandInput = document.getElementById("command");
+
+    chatForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const command = commandInput.value.trim();
+      if (!command) return;
+
+      addMessage("You", command, "user-msg");
+      commandInput.value = "";
+
+      const response = await fetch("/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ command })
+      });
+
+      const data = await response.json();
+      addMessage("Assistant", data.response, "bot-msg");
+    });
+
+    function addMessage(sender, text, className) {
+      const message = document.createElement("p");
+      message.className = className;
+      message.innerHTML = `<strong>${sender}:</strong> ${text}`;
+      chatBox.appendChild(message);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function startListening() {
+      if (!('webkitSpeechRecognition' in window)) {
+        alert("Speech recognition not supported.");
+        return;
+      }
+
+      const recognition = new webkitSpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        commandInput.value = transcript;
+      };
+
+      recognition.onerror = function(event) {
+        console.error("Speech recognition error", event);
+      };
+
+      recognition.start();
+    }
+  </script>
+</body>
+</html>
