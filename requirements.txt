@@ -1,4 +1,6 @@
-speechrecognition
-pyttsx3
-requests
+flask
 wikipedia
+SpeechRecognition
+pyttsx3
+pyaudio ; platform_system == "Windows"
+requests
