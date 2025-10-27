@@ -4,3 +4,4 @@ SpeechRecognition
 pyttsx3
 pyaudio ; platform_system == "Windows"
 requests
+flask-cors
